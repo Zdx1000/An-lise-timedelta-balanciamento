@@ -1,0 +1,70 @@
+.btn-grafico {
+	background: #fff;
+	color: #1f4e79;
+	border: 2px solid #1f4e79;
+	border-radius: 4px;
+	padding: 6px 16px;
+	font-weight: 600;
+	font-size: 1rem;
+	cursor: pointer;
+	transition: background 0.2s, color 0.2s;
+}
+.btn-grafico:hover {
+	background: #1f4e79;
+	color: #fff;
+}
+#graficoWrapper {
+	background: #fff;
+	border: 1px solid #ddd;
+	padding: 16px 8px 8px 8px;
+	margin-top: 10px;
+	min-height: 320px;
+}
+/* Loading overlay */
+.loading-overlay {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(255,255,255,0.85);
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	transition: opacity 0.3s;
+}
+.spinner {
+	width: 48px; height: 48px;
+	border: 6px solid #e4e9f0;
+	border-top: 6px solid #1f4e79;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin-bottom: 12px;
+}
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+.loading-text {
+	color: #1f4e79;
+	font-size: 1.1rem;
+	font-weight: 500;
+}
+td .excel { color:#1f4e79; font-size:0.85em; font-family:monospace; letter-spacing:1px; }
+body { font-family: Arial, sans-serif; margin:0; background:#f5f6fa; color:#222; }
+header { background:#1f4e79; color:#fff; padding:12px 20px; }
+header h1 { margin:0; font-size:1.2rem; }
+main { padding:16px 20px; }
+.filtros { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+select, button { padding:6px 10px; font-size:0.9rem; }
+button { cursor:pointer; background:#1f4e79; color:#fff; border:0; border-radius:4px; }
+button:hover { background:#275f94; }
+.status { font-size:0.8rem; color:#555; }
+.tabela-wrapper { overflow:auto; max-height:70vh; border:1px solid #ddd; background:#fff; }
+table { border-collapse:collapse; width:100%; font-size:0.85rem; }
+thead { background:#e4e9f0; position:sticky; top:0; }
+th, td { padding:6px 8px; border-bottom:1px solid #eee; text-align:left; }
+td.num { text-align:right; font-variant-numeric: tabular-nums; }
+tr:nth-child(even) { background:#fafafa; }
+tr:hover { background:#f0f7ff; }
+footer { text-align:center; padding:10px; font-size:0.7rem; color:#666; }
+@media (max-width:700px){ th, td { white-space:nowrap; } }

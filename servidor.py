@@ -2,34 +2,40 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import os
+from flask import Flask, jsonify, send_from_directory, request
+from flask_cors import CORS
 
 class Servidor:
-    def __init__(self, inicial_nome: str = None, list_colunas: list = None, dados_xlsx: pd.DataFrame = None):
-        self.nome = inicial_nome
+    def __init__(self, inicial_nome: str = None, list_colunas: list = None):
+        self.nome = inicial_nome or ""
         self.colunas = list_colunas if list_colunas else []
+        self.dados = self.carregar_dados()
 
-        def carregar_dados(self, caminho_arquivo: str = None) -> pd.DataFrame:
-            # Se não fornecer caminho, tenta abrir o arquivo xlsx com inicial_nome na mesma pasta
-            if not caminho_arquivo:
-                pasta_atual = os.path.dirname(os.path.abspath(__file__))
-                # Procura um arquivo que começa com self.nome e termina com .xlsx
-                arquivos = [f for f in os.listdir(pasta_atual) if f.startswith(self.nome) and f.endswith('.xlsx')]
-                if arquivos:
-                    caminho_arquivo = os.path.join(pasta_atual, arquivos[0])
-                else:
-                    caminho_arquivo = os.path.join(pasta_atual, f"{self.nome}.xlsx")
-            if os.path.exists(caminho_arquivo):
-                try:
-                    dados = pd.read_excel(caminho_arquivo)
-                    return dados[self.colunas]
-                except Exception as e:
-                    return pd.DataFrame()
+    def carregar_dados(self, caminho_arquivo: str = None) -> pd.DataFrame:
+        """Carrega dados de um arquivo Excel baseado no prefixo self.nome.
+        Retorna DataFrame vazio se não encontrar ou se houver erro.
+        """
+        if not caminho_arquivo:
+            pasta_atual = os.path.dirname(os.path.abspath(__file__))
+            # Procura um arquivo que começa com self.nome e termina com .xlsx
+            arquivos = [f for f in os.listdir(pasta_atual) if f.startswith(self.nome) and f.endswith('.xlsx')]
+            if arquivos:
+                caminho_arquivo = os.path.join(pasta_atual, arquivos[0])
             else:
-                return pd.DataFrame()
-            
-        dados_xlsx = carregar_dados(self)
+                caminho_arquivo = os.path.join(pasta_atual, f"{self.nome}.xlsx")
 
-        self.dados = dados_xlsx if not dados_xlsx.empty else pd.DataFrame(columns=self.colunas)
+        if os.path.exists(caminho_arquivo):
+            try:
+                dados = pd.read_excel(caminho_arquivo)
+                if self.colunas:
+                    # Apenas mantém colunas existentes para evitar erro
+                    colunas_validas = [c for c in self.colunas if c in dados.columns]
+                    dados = dados[colunas_validas]
+                return dados
+            except Exception as e:
+                print(f"Erro ao ler arquivo: {e}")
+                return pd.DataFrame(columns=self.colunas)
+        return pd.DataFrame(columns=self.colunas)
 
     def mostrar_dados(self):
         print(self.dados)
@@ -64,31 +70,74 @@ class Servidor:
         tempo_medio = tempo_medio[tempo_medio["Endereço"].str.count("-") == 2]
 
         tempo_medio["Modulo"] = tempo_medio["Endereço"].str[:4]
-
         self.dados = tempo_medio
+        return self.dados
 
     def dinamica(self, x, x2, y, filter: str = None):
+        df = self.dados.copy()
         if filter:
-            self.dados = self.dados[self.dados["Modulo"] == filter]
+            df = df[df["Modulo"] == filter]
 
-        self.dados = pd.pivot_table(self.dados, index=[x, x2], values=y, aggfunc="mean", fill_value=0)
+        df = pd.pivot_table(df, index=[x, x2], values=y, aggfunc="mean", fill_value=0).reset_index()
+        return df
+
+    def gerar_pivot(self, modulo: str | None = None):
+        return self.dinamica("Endereço", "Área", "Tempo de Execução", modulo)
+
+    def get_modulos(self):
+        if "Modulo" not in self.dados.columns:
+            return []
+        return sorted(self.dados["Modulo"].dropna().unique().tolist())
+
+    def processar(self):
+        if self.converter_coluns():
+            self.tratar_dados_tempoDeSeparacao()
+        return self.dados
 
     
     def salvar_arquivo(self, nome_arquivo: str = None):
         with pd.ExcelWriter(nome_arquivo if nome_arquivo else "Metrica.xlsx") as writer:
             self.dados.to_excel(writer, index=True, sheet_name="Metrica")
 
+# --------------------------- API FLASK ---------------------------
+
+def criar_app():
+    servidor = Servidor(
+        "Consulta_",
+        [
+            "Descrição Atividade", "Data", "Tempo de Execução", "Nome Separador",
+            "Container", "Carga", "Área", "Tipo Área", "Endereço", "Item", "Qtd Sep."
+        ]
+    )
+    servidor.processar()
+
+    app = Flask(__name__, static_folder="Componentes", template_folder="Componentes")
+    CORS(app)
+
+    @app.route("/")
+    def index():
+        return send_from_directory("Componentes", "main.html")
+
+    @app.route("/api/modulos")
+    def api_modulos():
+        return jsonify({"modulos": servidor.get_modulos()})
+
+    @app.route("/api/dados")
+    def api_dados():
+        modulo = request.args.get("modulo")
+        pivot = servidor.gerar_pivot(modulo)
+        # Normaliza para JSON
+        registros = pivot.to_dict(orient="records")
+        return jsonify({"dados": registros})
+
+    @app.route('/Componentes/<path:filename>')
+    def componentes_static(filename):
+        return send_from_directory('Componentes', filename)
+
+    return app
 
 
-if __name__ == "__main__":
-    print("Iniciando Servidor...")
-    servidor = Servidor("Consulta_", ["Descrição Atividade", "Data", "Tempo de Execução", "Nome Separador",
-                                       "Container", "Carga", "Área", "Tipo Área", "Endereço", "Item", "Qtd Sep."])
-    
-    valit = servidor.converter_coluns()
-    if valit:
-        servidor.tratar_dados_tempoDeSeparacao()
-
-        servidor.dinamica("Endereço", "Área", "Tempo de Execução")
-
-    servidor.salvar_arquivo("Metrica_Tempo_de_Separacao.xlsx")
+if __name__ == "__main__":  # Execução para testes locais
+    app = criar_app()
+    print("API Flask iniciada em http://127.0.0.1:5000")
+    app.run(debug=True)

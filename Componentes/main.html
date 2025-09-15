@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8" />
+	<title>Métrica Tempo de Separação</title>
+	<link rel="stylesheet" href="/Componentes/style.css" />
+</head>
+<body>
+		<header style="display:flex;justify-content:space-between;align-items:center;">
+			<h1>Métrica Tempo de Separação</h1>
+			<button id="btnGrafico" class="btn-grafico">Gráfico</button>
+		</header>
+		<div id="loading" class="loading-overlay">
+			<div class="spinner"></div>
+			<span class="loading-text">Carregando...</span>
+		</div>
+		<main>
+			<section class="filtros">
+				<label for="moduloSelect">Módulo:</label>
+				<select id="moduloSelect">
+					<option value="">Todos</option>
+				</select>
+				<label for="areaSelect">Área:</label>
+				<select id="areaSelect">
+					<option value="">Todas</option>
+				</select>
+				<button id="btnAtualizar">Atualizar</button>
+				<span id="status" class="status"></span>
+			</section>
+			<section class="tabela-wrapper" id="tabelaWrapper">
+				<table id="tabelaDados">
+					<thead>
+						<tr>
+							<th>Endereço</th>
+							<th>Área</th>
+							<th>Tempo Médio<br>(horas / hh:mm:ss)</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</section>
+			<section id="graficoWrapper" style="display:none;">
+				<canvas id="graficoCanvas" height="320"></canvas>
+			</section>
+	</main>
+	<footer>
+		<small>Gerado pela API Flask - Atualize para recarregar dados.</small>
+	</footer>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		<script src="/Componentes/scripts.js"></script>
+</body>
+</html>

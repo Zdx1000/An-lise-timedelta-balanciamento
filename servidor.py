@@ -73,9 +73,11 @@ class Servidor:
 
         self.dados = pd.pivot_table(self.dados, index=[x, x2], values=y, aggfunc="mean", fill_value=0)
 
-        
-        self.dados.to_excel("Resultado_Dinamica.xlsx")
     
+    def salvar_arquivo(self, nome_arquivo: str = None):
+        with pd.ExcelWriter(nome_arquivo if nome_arquivo else "Metrica.xlsx") as writer:
+            self.dados.to_excel(writer, index=True, sheet_name="Metrica")
+
 
 
 if __name__ == "__main__":
@@ -88,3 +90,5 @@ if __name__ == "__main__":
         servidor.tratar_dados_tempoDeSeparacao()
 
         servidor.dinamica("Endereço", "Área", "Tempo de Execução")
+
+    servidor.salvar_arquivo("Metrica_Tempo_de_Separacao.xlsx")

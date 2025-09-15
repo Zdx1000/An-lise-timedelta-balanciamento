@@ -1,52 +1,144 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-	<meta charset="UTF-8" />
-	<title>Métrica Tempo de Separação</title>
-	<link rel="stylesheet" href="/Componentes/style.css" />
+	<!-- Meta Tags Essenciais -->
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<!-- Segurança básica -->
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; upgrade-insecure-requests;">
+	
+	<!-- SEO e Descrição -->
+	<title>Análise de Tempo de Separação | Dashboard de Métricas Operacionais</title>
+	<meta name="description" content="Dashboard para análise de métricas de tempo de separação operacional com visualizações gráficas e filtros dinâmicos.">
+	<meta name="keywords" content="análise, tempo, separação, dashboard, métricas, operacional">
+	<meta name="author" content="Sistema de Análise Operacional">
+	
+	<!-- Open Graph / Social Media -->
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="Análise de Tempo de Separação">
+	<meta property="og:description" content="Dashboard para análise de métricas de tempo de separação operacional">
+	<meta property="og:locale" content="pt_BR">
+	
+	<!-- Performance e Cache -->
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	
+	<!-- Favicon e Ícones -->
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234CAF50'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E">
+	
+	<!-- Preconnect para Performance -->
+	<link rel="preconnect" href="https://cdn.jsdelivr.net">
+	<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+	
+	<!-- Estilos CSS -->
+	<link rel="stylesheet" href="/Componentes/style.css">
+	
+	<!-- Preload de Scripts Críticos -->
+	<link rel="preload" href="https://cdn.jsdelivr.net/npm/apexcharts" as="script" crossorigin>
+	<link rel="preload" href="/Componentes/scripts.js" as="script">
 </head>
 <body>
-		<header style="display:flex;justify-content:space-between;align-items:center;">
-			<h1>Métrica Tempo de Separação</h1>
-			<button id="btnGrafico" class="btn-grafico">Gráfico</button>
+		<header class="main-header">
+			<div class="header-container">
+				<div class="header-brand">
+					<div class="brand-icon">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+						</svg>
+					</div>
+					<div class="brand-text">
+						<h1>Análise de Tempo de Separação</h1>
+						<span class="brand-subtitle">Dashboard de Métricas Operacionais</span>
+					</div>
+				</div>
+				<div class="header-filters">
+					<div class="filter-group">
+						<label for="moduloSelect">Módulo:</label>
+						<select id="moduloSelect">
+							<option value="">Todos</option>
+						</select>
+					</div>
+					<div class="filter-group">
+						<label for="areaSelect">Área:</label>
+						<select id="areaSelect">
+							<option value="">Todas</option>
+						</select>
+					</div>
+					<span id="status" class="status-indicator"></span>
+				</div>
+				<div class="header-actions">
+					<button id="btnGrafico" class="btn-toggle">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L3 16.99z"/>
+						</svg>
+						<span>Gráfico</span>
+					</button>
+				</div>
+			</div>
 		</header>
-		<div id="loading" class="loading-overlay">
+		<div id="loading" class="loading-overlay is-active">
 			<div class="spinner"></div>
 			<span class="loading-text">Carregando...</span>
 		</div>
 		<main>
-			<section class="filtros">
-				<label for="moduloSelect">Módulo:</label>
-				<select id="moduloSelect">
-					<option value="">Todos</option>
-				</select>
-				<label for="areaSelect">Área:</label>
-				<select id="areaSelect">
-					<option value="">Todas</option>
-				</select>
-				<button id="btnAtualizar">Atualizar</button>
-				<span id="status" class="status"></span>
-			</section>
 			<section class="tabela-wrapper" id="tabelaWrapper">
-				<table id="tabelaDados">
-					<thead>
-						<tr>
-							<th>Endereço</th>
-							<th>Área</th>
-							<th>Tempo Médio<br>(horas / hh:mm:ss)</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-				</table>
+				<div class="tabela-scroll">
+					<table id="tabelaDados">
+						<thead>
+							<tr>
+								<th>
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px; opacity: 0.7;">
+										<path d="M12 2L2 7v10c0 5.55 3.84 9.05 9 9.05s9-3.5 9-9.05V7l-10-5z"/>
+									</svg>
+									Endereço
+								</th>
+								<th>
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px; opacity: 0.7;">
+										<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+									</svg>
+									Área
+								</th>
+								<th style="text-align: center;">
+									<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px; opacity: 0.7;">
+										<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+										<path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+									</svg>
+									Tempo Médio<br><span style="font-size: 10px; opacity: 0.6;">(horas / hh:mm:ss)</span>
+								</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+				<div class="paginacao" id="paginacao">
+					<div class="paginacao-info" id="paginacaoInfo">--</div>
+					<div class="paginacao-controles">
+						<button type="button" class="pg-btn" id="pgPrimeira" aria-label="Primeira página">«</button>
+						<button type="button" class="pg-btn" id="pgAnterior" aria-label="Página anterior">‹</button>
+						<select id="pgSelect" class="pg-select" aria-label="Selecionar página"></select>
+						<button type="button" class="pg-btn" id="pgProxima" aria-label="Próxima página">›</button>
+						<button type="button" class="pg-btn" id="pgUltima" aria-label="Última página">»</button>
+						<label class="pg-size-label">Linhas:
+							<select id="pgTamanho" class="pg-size">
+								<option value="10">10</option>
+								<option value="25">25</option>
+								<option value="50">50</option>
+								<option value="100">100</option>
+							</select>
+						</label>
+					</div>
+				</div>
 			</section>
 			<section id="graficoWrapper" style="display:none;">
-				<canvas id="graficoCanvas" height="320"></canvas>
+				<div id="graficoContainer" style="max-width:100%;"></div>
 			</section>
 	</main>
 	<footer>
 		<small>Gerado pela API Flask - Atualize para recarregar dados.</small>
 	</footer>
-		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-		<script src="/Componentes/scripts.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
+		<script src="/Componentes/scripts.js" defer></script>
 </body>
 </html>

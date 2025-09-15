@@ -9,11 +9,25 @@ class Servidor:
         self.colunas = list_colunas if list_colunas else []
 
         def carregar_dados(self, caminho_arquivo: str = None) -> pd.DataFrame:
-            None
+            # Se não fornecer caminho, tenta abrir o arquivo xlsx com inicial_nome na mesma pasta
+            if not caminho_arquivo:
+                pasta_atual = os.path.dirname(os.path.abspath(__file__))
+                caminho_arquivo = os.path.join(pasta_atual, f"{self.nome}.xlsx")
+            if os.path.exists(caminho_arquivo):
+                try:
+                    dados = pd.read_excel(caminho_arquivo)
+                    return dados[self.colunas]
+                except Exception as e:
+                    print(f"Erro ao carregar o arquivo: {e}")
+                    return pd.DataFrame()
+            else:
+                print("Caminho do arquivo inválido ou não encontrado.")
+                return pd.DataFrame()
+            
+        dados_xlsx = carregar_dados(self)
+        print(dados_xlsx)
 
-
-
-        pass
+        
 
 
 if __name__ == "__main__":

@@ -279,7 +279,8 @@ function renderGrafico(dados) {
 		},
 		stroke: {
 			curve: 'smooth',
-			width: 3
+			width: 3,
+			colors: ['#143956'] // linha mais escura
 		},
 		series: [{
 			name: 'Tempo Médio (horas)',
@@ -337,14 +338,14 @@ function renderGrafico(dados) {
 				const ss = totalSegundos % 60;
 				const rank = rankMap.get(endereco);
 				const categoria = rank <= 3 ? 'Top' : (rank > (rankingDesc.length - 3) ? 'Bottom' : 'Normal');
-				return `\n<div class="apx-tooltip" style="background:#fff;border:1px solid #d0d7de;padding:8px 10px;border-radius:6px;box-shadow:0 4px 10px -2px rgba(0,0,0,.12);font-family:system-ui,Segoe UI,Roboto,Arial;font-size:12px;line-height:1.35;min-width:230px;">\n  <div style='font-weight:600;margin-bottom:4px;color:#143956;'>${endereco}</div>\n  <div style='display:grid;grid-template-columns:90px 1fr;gap:2px 8px;'>\n    <span style='color:#555;'>Rank:</span><strong>#${rank}</strong>\n    <span style='color:#555;'>Categoria:</span><span style='font-weight:600;color:${categoria==='Top'?'#c62828':(categoria==='Bottom'?'#2e7d32':'#1f4e79')};'>${categoria}</span>\n    <span style='color:#555;'>Horas:</span><span>${val.toFixed(4)} h</span>\n    <span style='color:#555;'>HH:MM:SS:</span><span>${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}</span>\n  </div>\n</div>`;
+				return `\n<div class="apx-tooltip" style="background:#fff;border:1px solid #d0d7de;padding:8px 10px;border-radius:6px;box-shadow:0 4px 10px -2px rgba(0,0,0,.12);font-family:system-ui,Segoe UI,Roboto,Arial;font-size:12px;line-height:1.35;min-width:230px;">\n  <div style='font-weight:600;margin-bottom:4px;color:#143956;'>${endereco}</div>\n  <div style='display:grid;grid-template-columns:90px 1fr;gap:2px 8px;'>\n    <span style='color:#555;'>Rank:</span><strong>#${rank}</strong>\n    <span style='color:#555;'>Categoria:</span><span style='font-weight:600;color:${categoria==='Top'?'#c62828':(categoria==='Bottom'?'#2e7d32':'#143956')};'>${categoria}</span>\n    <span style='color:#555;'>Horas:</span><span>${val.toFixed(4)} h</span>\n    <span style='color:#555;'>HH:MM:SS:</span><span>${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}</span>\n  </div>\n</div>`;
 			}
 		},
 		title: { text: 'Curva de Tempo Médio por Endereço', align: 'center' },
-		colors: ['#1f4e79'],
+		colors: ['#143956'],
 		fill: {
 			type: 'gradient',
-			gradient: { shade: 'light', type: 'vertical', opacityFrom: 0.5, opacityTo: 0.05, stops: [0, 100] }
+			gradient: { shade: 'dark', type: 'vertical', opacityFrom: 1, opacityTo: 0.3, stops: [0, 100] }
 		},
 		noData: { text: 'Sem dados' }
 	};

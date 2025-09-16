@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import os
+import sys
 from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 
@@ -14,10 +15,11 @@ class Servidor:
     def carregar_dados(self, caminho_arquivo: str = None) -> pd.DataFrame:
         """Carrega dados de um arquivo Excel baseado no prefixo self.nome.
         Retorna DataFrame vazio se não encontrar ou se houver erro.
+        Compatível com execução como .py ou .exe.
         """
         if not caminho_arquivo:
-            pasta_atual = os.path.dirname(os.path.abspath(__file__))
-            # Procura um arquivo que começa com self.nome e termina com .xlsx
+            # Usa sys.executable para garantir compatibilidade com .exe
+            pasta_atual = os.path.dirname(os.path.abspath(sys.executable if getattr(sys, 'frozen', False) else __file__))
             arquivos = [f for f in os.listdir(pasta_atual) if f.startswith(self.nome) and f.endswith('.xlsx')]
             if arquivos:
                 caminho_arquivo = os.path.join(pasta_atual, arquivos[0])
@@ -28,7 +30,6 @@ class Servidor:
             try:
                 dados = pd.read_excel(caminho_arquivo)
                 if self.colunas:
-                    # Apenas mantém colunas existentes para evitar erro
                     colunas_validas = [c for c in self.colunas if c in dados.columns]
                     dados = dados[colunas_validas]
                 return dados
